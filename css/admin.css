@@ -1,0 +1,23 @@
+/* Styles scoped to the WP Athletes admin page */
+#wp_athletes_import_form {
+    margin-bottom: 20px;
+}
+
+#csv_preview table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#csv_preview th, #csv_preview td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+#csv_preview th {
+    background-color: #f2f2f2;
+    text-align: left;
+}
+
+#import_progress {
+    margin-top: 20px;
+}
