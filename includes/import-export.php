@@ -1,75 +1,89 @@
 <?php
-// Prevent direct file access
-defined('ABSPATH') or die('Direct script access disallowed.');
+// Import and export functionality
+
+// Register admin post actions
+add_action('admin_post_wp_athletes_import', 'wp_athletes_import');
+add_action('admin_post_wp_athletes_export', 'wp_athletes_export');
 
 /**
- * Handles importing of athlete data from a CSV file.
+ * Import athletes from CSV
  */
+function wp_athletes_import() {
+    if (!current_user_can('manage_options')) {
+        return;
+    }
 
- function wp_athletes_handle_import() {
-    if (isset($_FILES['wp_athletes_import_csv'])) {
-        $csv_file = $_FILES['wp_athletes_import_csv']['tmp_name'];
-        if (is_uploaded_file($csv_file)) {
-            $file_handle = fopen($csv_file, 'r');
-            while (!feof($file_handle) ) {
-                $athlete_data = fgetcsv($file_handle, 1000, ',');
-                // Assume CSV columns are: Name, Birth Year, Discipline, Team, Medal Count
-                $args = [
-                    'post_title'   => $athlete_data[0],
-                    'post_status'  => 'publish',
-                    'post_type'    => 'athlete',
-                    'meta_input'   => [
-                        'full_name'   => $athlete_data[0],
-                        'birth_year'  => $athlete_data[1],
-                        'discipline'  => $athlete_data[2],
-                        'team'        => $athlete_data[3],
-                        'medal_count' => $athlete_data[4],
-                    ]
-                ];
-                wp_insert_post($args);
+    if (!isset($_FILES['wp_athletes_import_csv']) || !wp_verify_nonce($_POST['_wpnonce'], 'wp_athletes_import')) {
+        return;
+    }
+
+    $file = $_FILES['wp_athletes_import_csv']['tmp_name'];
+    $csv_data = array_map('str_getcsv', file($file));
+
+    if (!empty($csv_data)) {
+        $headers = array_shift($csv_data);
+        foreach ($csv_data as $row) {
+            $athlete_data = array_combine($headers, $row);
+            $post_id = wp_insert_post(array(
+                'post_title' => $athlete_data['name'],
+                'post_type' => 'athlete',
+                'post_status' => 'publish',
+            ));
+
+            if ($post_id) {
+                // Map CSV data to ACF fields
+                foreach ($athlete_data as $key => $value) {
+                    update_field($key, $value, $post_id);
+                }
             }
-            fclose($file_handle);
-            echo '<div class="notice notice-success is-dismissible"><p>Import successful.</p></div>';
         }
     }
-}
 
-// Add an action to handle file uploads
-add_action('admin_post_wp_athletes_import', 'wp_athletes_handle_import');
-
-/**
- * Handles exporting athlete data to a CSV file.
- */
-function wp_athletes_handle_export() {
-    $args = [
-        'post_type'      => 'athlete',
-        'posts_per_page' => -1,
-    ];
-    $athletes_query = new WP_Query($args);
-    header('Content-Type: text/csv');
-    header('Content-Disposition: attachment; filename="athletes.csv"');
-
-    $output = fopen('php://output', 'w');
-    fputcsv($output, ['Name', 'Birth Year', 'Discipline', 'Team', 'Medal Count']);
-
-    if ($athletes_query->have_posts()) : while ($athletes_query->have_posts()) : $athletes_query->the_post();
-        fputcsv($output, [
-            get_the_title(),
-            get_field('birth_year'),
-            get_field('discipline'),
-            get_field('team'),
-            get_field('medal_count')
-        ]);
-    endwhile; endif;
-    fclose($output);
+    wp_redirect(admin_url('admin.php?page=wp_athletes&import=success'));
     exit;
 }
 
-// Add an action for exporting data
-add_action('admin_post_wp_athletes_export', 'wp_athletes_handle_export');
+/**
+ * Export athletes to CSV
+ */
+function wp_athletes_export() {
+    if (!current_user_can('manage_options')) {
+        return;
+    }
 
+    // Fetch all athletes
+    $athletes = get_posts(array(
+        'post_type' => 'athlete',
+        'numberposts' => -1
+    ));
 
-// These functions would typically be tied to admin actions or specific admin pages.
+    if (empty($athletes)) {
+        return;
+    }
 
+    // Prepare CSV headers
+    $headers = array('name', 'sport', 'age', 'country'); // Add more fields as needed
+    $csv_data = array($headers);
 
+    // Prepare CSV rows
+    foreach ($athletes as $athlete) {
+        $athlete_data = array(
+            get_the_title($athlete->ID),
+            get_field('sport', $athlete->ID),
+            get_field('age', $athlete->ID),
+            get_field('country', $athlete->ID)
+        );
+        $csv_data[] = $athlete_data;
+    }
 
+    // Output CSV
+    header('Content-Type: text/csv');
+    header('Content-Disposition: attachment; filename="athletes.csv"');
+    $output = fopen('php://output', 'w');
+    foreach ($csv_data as $row) {
+        fputcsv($output, $row);
+    }
+    fclose($output);
+    exit;
+}
+?>

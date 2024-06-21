@@ -27,6 +27,7 @@ function wp_athletes_admin_page() {
         
         <h3>Import Athletes</h3>
         <form id="wp_athletes_import_form" method="post" action="<?php echo admin_url('admin-post.php'); ?>" enctype="multipart/form-data">
+            <?php wp_nonce_field('wp_athletes_import'); ?>
             <input type="hidden" name="action" value="wp_athletes_import">
             <input type="file" name="wp_athletes_import_csv" id="wp_athletes_import_csv" required>
             <button type="submit" class="button button-primary">Import CSV</button>
@@ -39,12 +40,12 @@ function wp_athletes_admin_page() {
         
         <h3>Export Athletes</h3>
         <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
+            <?php wp_nonce_field('wp_athletes_export'); ?>
             <input type="hidden" name="action" value="wp_athletes_export">
             <button type="submit" class="button button-primary">Export to CSV</button>
         </form>
     </div>
     <?php
 }
-
 
 add_action('admin_menu', 'wp_athletes_add_admin_menu');
