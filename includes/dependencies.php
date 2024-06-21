@@ -2,7 +2,7 @@
 /**
  * Check plugin dependencies.
  * Path: wp-athletes-plugin/includes/dependencies.php
- * Description: Ensures that all necessary plugins (Advanced Custom Fields and GamiPress) are active. If not, the plugin is deactivated to prevent errors.
+ * Description: Ensures that all necessary plugins (Advanced Custom Fields and GamiPress) are active. If not, redirects to the onboarding screen to assist with installation and activation.
  */
 
 defined('ABSPATH') or die('Direct script access disallowed.');
@@ -14,14 +14,27 @@ function wp_athletes_check_dependencies() {
         'gamipress/gamipress.php'          // Path to the main plugin file of GamiPress
     ];
 
+    $missing_plugins = [];
     foreach ($required_plugins as $plugin) {
         if (!is_plugin_active($plugin)) {
-            add_action('admin_notices', function() use ($plugin) {
-                echo '<div class="error"><p>' . sprintf(__('WP Athletes Plugin requires %s to be installed and active.', 'wp-athletes-plugin'), $plugin) . '</p></div>';
-            });
-            deactivate_plugins(plugin_basename(__FILE__));  // Deactivates the plugin if dependencies are not met
-            return;  // Stop the execution of further code
+            $missing_plugins[] = $plugin;
         }
+    }
+
+    if (!empty($missing_plugins)) {
+        add_action('admin_notices', function() use ($missing_plugins) {
+            foreach ($missing_plugins as $plugin) {
+                echo '<div class="error"><p>' . sprintf(__('WP Athletes Plugin requires %s to be installed and active.', 'wp-athletes-plugin'), $plugin) . '</p></div>';
+            }
+        });
+
+        add_action('admin_init', function() {
+            if (current_user_can('manage_options')) {
+                $onboarding_page = admin_url('admin.php?page=wp-athletes-setup');
+                wp_redirect($onboarding_page);
+                exit;
+            }
+        });
     }
 }
 
