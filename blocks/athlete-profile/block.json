@@ -1,0 +1,17 @@
+{
+    "apiVersion": 2,
+    "name": "wp-athletes/athlete-profile",
+    "title": "Athlete Profile",
+    "category": "widgets",
+    "icon": "admin-users",
+    "description": "Displays detailed information about an athlete.",
+    "keywords": [
+        "athlete",
+        "profile"
+    ],
+    "attributes": {
+        "athleteId": {
+            "type": "number"
+        }
+    }
+}

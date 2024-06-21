@@ -1,0 +1,26 @@
+{
+    "apiVersion": 2,
+    "name": "wp-athletes/athlete-list",
+    "title": "Athlete List",
+    "category": "widgets",
+    "icon": "groups",
+    "description": "Lists athletes based on teams or disciplines.",
+    "keywords": [
+        "athlete",
+        "list",
+        "team",
+        "discipline"
+    ],
+    "attributes": {
+        "team": {
+            "type": "string"
+        },
+        "discipline": {
+            "type": "string"
+        },
+        "numberOfItems": {
+            "type": "number",
+            "default": 10
+        }
+    }
+}
