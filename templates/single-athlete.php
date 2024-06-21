@@ -2,54 +2,33 @@
 /**
  * Single Athlete Template.
  * Path: wp-athletes-plugin/templates/single-athlete.php
- * Description: Displays detailed information about an individual athlete, integrating custom fields and taxonomies.
+ * Description: Displays detailed information about a single athlete.
  */
 
-get_header(); ?>
+get_header();
 
-<div id="primary" class="content-area">
-    <main id="main" class="site-main" role="main">
+while (have_posts()) : the_post(); ?>
+    <div class="athlete-profile">
+        <h1><?php the_title(); ?></h1>
+        <div class="athlete-details">
+            <div class="profile-picture">
+                <?php if (has_post_thumbnail()) {
+                    the_post_thumbnail('full');
+                } else {
+                    echo '<img src="' . esc_url(WP_ATHLETES_PLUGIN_URL . 'assets/images/default-profile.png') . '" alt="Default Profile Picture">';
+                } ?>
+            </div>
+            <div class="athlete-info">
+                <p><strong>First Name:</strong> <?php echo esc_html(get_field('first_name')); ?></p>
+                <p><strong>Last Name:</strong> <?php echo esc_html(get_field('last_name')); ?></p>
+                <p><strong>Year of Birth:</strong> <?php echo esc_html(get_field('year_of_birth')); ?></p>
+                <p><strong>Olympic Medal Count:</strong> <?php echo esc_html(get_field('olympic_medal_count')); ?></p>
+                <p><strong>Olympic Medal Type:</strong> <?php echo esc_html(get_field('olympic_medal_type')); ?></p>
+                <p><strong>Games Participation:</strong> <?php echo esc_html(get_field('games_participation')); ?></p>
+                <p><strong>First Olympic Game:</strong> <?php echo esc_html(get_field('first_olympic_game')); ?></p>
+            </div>
+        </div>
+    </div>
+<?php endwhile;
 
-        <?php
-        while ( have_posts() ) : the_post();
-
-            // Display featured image if it exists
-            if ( has_post_thumbnail() ) {
-                echo '<div class="athlete-featured-image">';
-                the_post_thumbnail('full');
-                echo '</div>';
-            }
-
-            echo '<div class="athlete-content">';
-            echo '<h1 class="entry-title">' . get_the_title() . '</h1>';
-
-            // Display custom fields associated with the athlete
-            echo '<div class="athlete-details">';
-            echo '<p><strong>First Name:</strong> ' . get_field('first_name') . '</p>';
-            echo '<p><strong>Last Name:</strong> ' . get_field('last_name') . '</p>';
-            echo '<p><strong>Year of Birth:</strong> ' . get_field('year_of_birth') . '</p>';
-            echo '<p><strong>Olympic Medals:</strong> ' . get_field('olympic_medal_count') . '</p>';
-            echo '<p><strong>Top Medal Type:</strong> ' . get_field('olympic_medal_type') . '</p>';
-            echo '<p><strong>Games Participated:</strong> ' . get_field('games_participation') . '</p>';
-            echo '</div>';
-
-            // Display content if any
-            if ( get_the_content() ) {
-                echo '<div class="athlete-bio">';
-                the_content();
-                echo '</div>';
-            }
-
-            echo '</div>';
-
-            // Link back to the archive page
-            echo '<p><a href="' . get_post_type_archive_link('athlete') . '">Back to Athletes</a></p>';
-
-        endwhile; // End of the loop.
-        ?>
-
-    </main><!-- #main -->
-</div><!-- #primary -->
-
-<?php
 get_footer();

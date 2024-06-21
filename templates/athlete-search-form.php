@@ -2,13 +2,12 @@
 /**
  * Athlete Search Form Template.
  * Path: wp-athletes-plugin/templates/athlete-search-form.php
- * Description: Provides a search form for filtering athletes by team, discipline, birth year, and more, enhancing user interaction and accessibility.
+ * Description: Provides a search form for filtering athletes by team, discipline, birth year, and more.
  */
 
 // Ensure this file is being included in a WordPress environment
 defined('ABSPATH') or die('Direct script access disallowed.');
 
-// Get the values from query variables to maintain state across searches
 $team = get_query_var('team', '');
 $discipline = get_query_var('discipline', '');
 $birth_year = get_query_var('birth_year', '');

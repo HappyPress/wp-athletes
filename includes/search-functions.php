@@ -1,23 +1,17 @@
 <?php
 /**
- * Search functions for WP Athletes Plugin.
+ * Search functionalities for WP Athletes Plugin.
  * Path: wp-athletes-plugin/includes/search-functions.php
- * Description: Handles search and filtering functionality for the Athlete custom post type.
+ * Description: Provides AJAX-based search functionality for athletes, with filters for team, discipline, and birth year.
  */
 
 defined('ABSPATH') or die('Direct script access disallowed.');
 
-/**
- * Registers AJAX actions for performing searches.
- */
 function wp_athletes_register_search_actions() {
     add_action('wp_ajax_nopriv_athlete_search', 'wp_athletes_handle_search_request');
     add_action('wp_ajax_athlete_search', 'wp_athletes_handle_search_request');
 }
 
-/**
- * Handles the AJAX request for searching athletes.
- */
 function wp_athletes_handle_search_request() {
     // Ensure we have the required parameters to perform a search
     if (isset($_POST['search_terms'])) {
@@ -44,11 +38,8 @@ function wp_athletes_handle_search_request() {
     wp_die(); // Always include wp_die() at the end of AJAX handlers
 }
 
-/**
- * Enqueues necessary scripts for AJAX functionality.
- */
 function wp_athletes_enqueue_search_scripts() {
-    wp_enqueue_script('wp-athletes-search', plugin_dir_url(__FILE__) . '../assets/js/search.js', array('jquery'), null, true);
+    wp_enqueue_script('wp-athletes-search', WP_ATHLETES_PLUGIN_URL . 'assets/js/search.js', array('jquery'), null, true);
     wp_localize_script('wp-athletes-search', 'wpAthletes', array('ajaxurl' => admin_url('admin-ajax.php')));
 }
 

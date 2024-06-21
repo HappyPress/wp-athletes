@@ -7,7 +7,7 @@
 
 defined('ABSPATH') or die('Direct script access disallowed.');
 
-function register_athlete_cpt() {
+function wp_athletes_register_post_type() {
     $labels = [
         'name'                  => _x('Athletes', 'Post Type General Name', 'wp-athletes'),
         'singular_name'         => _x('Athlete', 'Post Type Singular Name', 'wp-athletes'),
@@ -27,10 +27,10 @@ function register_athlete_cpt() {
         'search_items'          => __('Search Athlete', 'wp-athletes'),
         'not_found'             => __('Not found', 'wp-athletes'),
         'not_found_in_trash'    => __('Not found in Trash', 'wp-athletes'),
-        'featured_image'        => __('Featured Image', 'wp-athletes'),
-        'set_featured_image'    => __('Set featured image', 'wp-athletes'),
-        'remove_featured_image' => __('Remove featured image', 'wp-athletes'),
-        'use_featured_image'    => __('Use as featured image', 'wp-athletes'),
+        'featured_image'        => __('Profile Picture', 'wp-athletes'),
+        'set_featured_image'    => __('Set profile picture', 'wp-athletes'),
+        'remove_featured_image' => __('Remove profile picture', 'wp-athletes'),
+        'use_featured_image'    => __('Use as profile picture', 'wp-athletes'),
         'insert_into_item'      => __('Insert into athlete', 'wp-athletes'),
         'uploaded_to_this_item' => __('Uploaded to this athlete', 'wp-athletes'),
         'items_list'            => __('Athletes list', 'wp-athletes'),
@@ -60,4 +60,4 @@ function register_athlete_cpt() {
     register_post_type('athlete', $args);
 }
 
-add_action('init', 'register_athlete_cpt');
+add_action('init', 'wp_athletes_register_post_type');

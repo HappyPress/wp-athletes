@@ -1,0 +1,29 @@
+/* Frontend CSS for WP Athletes Plugin
+ * Path: wp-athletes-plugin/assets/css/frontend.css
+ * Description: Styles for the frontend displays of WP Athletes Plugin.
+ */
+
+ .athlete-profile {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.profile-picture img {
+    max-width: 150px;
+    margin-right: 20px;
+}
+
+.athlete-info p {
+    margin: 5px 0;
+}
+
+.taxonomy-archive ul.athletes-list,
+.athlete-archive ul.athletes-list {
+    list-style: none;
+    padding: 0;
+}
+
+.taxonomy-archive ul.athletes-list li,
+.athlete-archive ul.athletes-list li {
+    margin: 5px 0;
+}
