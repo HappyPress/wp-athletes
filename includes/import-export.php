@@ -1,89 +1,81 @@
 <?php
-// Import and export functionality
-
-// Register admin post actions
-add_action('admin_post_wp_athletes_import', 'wp_athletes_import');
-add_action('admin_post_wp_athletes_export', 'wp_athletes_export');
-
 /**
- * Import athletes from CSV
+ * Import and export functionality for WP Athletes Plugin.
+ * Path: wp-athletes-plugin/includes/import-export.php
+ * Description: Handles the import and export of athlete data via CSV, allowing for bulk updates and data management.
  */
-function wp_athletes_import() {
-    if (!current_user_can('manage_options')) {
-        return;
-    }
 
-    if (!isset($_FILES['wp_athletes_import_csv']) || !wp_verify_nonce($_POST['_wpnonce'], 'wp_athletes_import')) {
-        return;
-    }
+defined('ABSPATH') or die('Direct script access disallowed.');
 
-    $file = $_FILES['wp_athletes_import_csv']['tmp_name'];
-    $csv_data = array_map('str_getcsv', file($file));
+function wp_athletes_import_athletes_from_csv() {
+    if (isset($_FILES['wp_athletes_csv_import']) && check_admin_referer('wp_athletes_csv_nonce', 'wp_athletes_csv_nonce')) {
+        $csv = $_FILES['wp_athletes_csv_import']['tmp_name'];
+        $file = fopen($csv, 'r');
+        $first = true;
 
-    if (!empty($csv_data)) {
-        $headers = array_shift($csv_data);
-        foreach ($csv_data as $row) {
-            $athlete_data = array_combine($headers, $row);
+        while (($column = fgetcsv($file, 1000, ",")) !== FALSE) {
+            if ($first) {
+                $first = false; // Skip the header
+                continue;
+            }
             $post_id = wp_insert_post(array(
-                'post_title' => $athlete_data['name'],
-                'post_type' => 'athlete',
-                'post_status' => 'publish',
+                'post_title'    => sanitize_text_field($column[0] . ' ' . $column[1]),
+                'post_type'     => 'athlete',
+                'post_status'   => 'publish'
             ));
-
             if ($post_id) {
-                // Map CSV data to ACF fields
-                foreach ($athlete_data as $key => $value) {
-                    update_field($key, $value, $post_id);
-                }
+                update_post_meta($post_id, 'first_name', sanitize_text_field($column[0]));
+                update_post_meta($post_id, 'last_name', sanitize_text_field($column[1]));
+                update_post_meta($post_id, 'year_of_birth', sanitize_text_field($column[2]));
+                update_post_meta($post_id, 'olympic_medal_count', sanitize_text_field($column[3]));
+                update_post_meta($post_id, 'olympic_medal_type', sanitize_text_field($column[4]));
+                update_post_meta($post_id, 'games_participation', sanitize_text_field($column[5]));
+                update_post_meta($post_id, 'first_olympic_game', sanitize_text_field($column[6]));
             }
         }
+        fclose($file);
+        add_action('admin_notices', 'wp_athletes_import_success_notice');
     }
-
-    wp_redirect(admin_url('admin.php?page=wp_athletes&import=success'));
-    exit;
 }
 
-/**
- * Export athletes to CSV
- */
-function wp_athletes_export() {
-    if (!current_user_can('manage_options')) {
-        return;
-    }
+function wp_athletes_export_athletes_to_csv() {
+    $filename = 'athletes_' . date('Y-m-d') . '.csv';
+    header("Content-Description: File Transfer");
+    header("Content-Disposition: attachment; filename=$filename");
+    header("Content-Type: application/csv; ");
 
-    // Fetch all athletes
-    $athletes = get_posts(array(
+    $file = fopen('php://output', 'w');
+
+    $header = array("First Name", "Last Name", "Year of Birth", "Olympic Medal Count", "Olympic Medal Type", "Games Participation", "First Olympic Game");
+    fputcsv($file, $header);
+
+    $args = array(
         'post_type' => 'athlete',
-        'numberposts' => -1
-    ));
+        'posts_per_page' => -1,
+        'post_status' => 'publish',
+    );
+    $athletes = get_posts($args);
 
-    if (empty($athletes)) {
-        return;
-    }
-
-    // Prepare CSV headers
-    $headers = array('name', 'sport', 'age', 'country'); // Add more fields as needed
-    $csv_data = array($headers);
-
-    // Prepare CSV rows
     foreach ($athletes as $athlete) {
-        $athlete_data = array(
-            get_the_title($athlete->ID),
-            get_field('sport', $athlete->ID),
-            get_field('age', $athlete->ID),
-            get_field('country', $athlete->ID)
+        $line = array(
+            get_post_meta($athlete->ID, 'first_name', true),
+            get_post_meta($athlete->ID, 'last_name', true),
+            get_post_meta($athlete->ID, 'year_of_birth', true),
+            get_post_meta($athlete->ID, 'olympic_medal_count', true),
+            get_post_meta($athlete->ID, 'olympic_medal_type', true),
+            get_post_meta($athlete->ID, 'games_participation', true),
+            get_post_meta($athlete->ID, 'first_olympic_game', true)
         );
-        $csv_data[] = $athlete_data;
+        fputcsv($file, $line);
     }
 
-    // Output CSV
-    header('Content-Type: text/csv');
-    header('Content-Disposition: attachment; filename="athletes.csv"');
-    $output = fopen('php://output', 'w');
-    foreach ($csv_data as $row) {
-        fputcsv($output, $row);
-    }
-    fclose($output);
+    fclose($file);
     exit;
 }
-?>
+
+function wp_athletes_import_success_notice() {
+    echo '<div class="notice notice-success is-dismissible"><p>Import successful.</p></div>';
+}
+
+add_action('admin_post_wp_athletes_import_csv', 'wp_athletes_import_athletes_from_csv');
+add_action('admin_post_wp_athletes_export_csv', 'wp_athletes_export_athletes_to_csv');

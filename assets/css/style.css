@@ -1,0 +1,58 @@
+/**
+ * Front-end styles for WP Athletes Plugin.
+ * Path: wp-athletes-plugin/assets/css/style.css
+ * Description: Provides styling for athlete profiles, search forms, and related elements on the front-end.
+ */
+
+/* General styling for athlete profiles */
+.athlete-profile {
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    margin: 20px;
+    padding: 20px;
+    background: #fff;
+}
+
+/* Styling for athlete details */
+.athlete-details {
+    margin-top: 20px;
+}
+
+.athlete-details h2 {
+    color: #333;
+}
+
+/* Search form styling */
+.athlete-search-form {
+    padding: 15px;
+    background: #f1f1f1;
+    margin-bottom: 20px;
+}
+
+.athlete-search-form input[type="text"],
+.athlete-search-form select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    display: inline-block;
+    box-sizing: border-box;
+}
+
+.athlete-search-form button {
+    background-color: #0073aa;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.athlete-search-form button:hover {
+    background-color: #005077;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .athlete-details {
+        text-align: center;
+    }
+}

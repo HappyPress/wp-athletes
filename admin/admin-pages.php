@@ -1,51 +1,82 @@
 <?php
-// Prevent direct file access
+/**
+ * Admin pages for WP Athletes Plugin.
+ * Path: wp-athletes-plugin/admin/admin-pages.php
+ * Description: Handles the creation and management of admin pages for configuring and managing the athlete profiles and import/export functionalities.
+ */
+
 defined('ABSPATH') or die('Direct script access disallowed.');
 
 /**
- * Add admin menu item for WP Athletes plugin.
+ * Adds custom admin pages under the Athlete post type menu.
  */
-function wp_athletes_add_admin_menu() {
-    add_menu_page(
-        'WP Athletes',
-        'WP Athletes',
-        'manage_options',
-        'wp_athletes',
-        'wp_athletes_admin_page',
-        'dashicons-admin-generic',
-        6
+function wp_athletes_add_admin_pages() {
+    add_submenu_page(
+        'edit.php?post_type=athlete',  // Parent slug
+        'Settings',                    // Page title
+        'Settings',                    // Menu title
+        'manage_options',              // Capability
+        'wp_athletes_settings',        // Menu slug
+        'wp_athletes_settings_page'    // Function to display the settings page
     );
 }
+add_action('admin_menu', 'wp_athletes_add_admin_pages');
 
 /**
- * Display the admin page for the WP Athletes plugin.
+ * Displays the settings page for the WP Athletes plugin.
  */
-function wp_athletes_admin_page() {
+function wp_athletes_settings_page() {
     ?>
     <div class="wrap">
-        <h2>WP Athletes - Import/Export Athletes</h2>
-        
-        <h3>Import Athletes</h3>
-        <form id="wp_athletes_import_form" method="post" action="<?php echo admin_url('admin-post.php'); ?>" enctype="multipart/form-data">
-            <?php wp_nonce_field('wp_athletes_import'); ?>
-            <input type="hidden" name="action" value="wp_athletes_import">
-            <input type="file" name="wp_athletes_import_csv" id="wp_athletes_import_csv" required>
-            <button type="submit" class="button button-primary">Import CSV</button>
-        </form>
-        <div id="csv_preview"></div>
-        <div id="import_progress" style="display:none;">
-            <h4>Importing...</h4>
-            <progress id="import_progress_bar" value="0" max="100"></progress>
-        </div>
-        
-        <h3>Export Athletes</h3>
-        <form method="post" action="<?php echo admin_url('admin-post.php'); ?>">
-            <?php wp_nonce_field('wp_athletes_export'); ?>
-            <input type="hidden" name="action" value="wp_athletes_export">
-            <button type="submit" class="button button-primary">Export to CSV</button>
+        <h2>Athletes Plugin Settings</h2>
+        <form method="post" action="options.php">
+            <?php
+            settings_fields('wp_athletes_options_group');
+            do_settings_sections('wp_athletes_settings');
+            submit_button();
+            ?>
         </form>
     </div>
     <?php
 }
 
-add_action('admin_menu', 'wp_athletes_add_admin_menu');
+/**
+ * Register settings, sections, and fields for the plugin settings page.
+ */
+function wp_athletes_register_settings() {
+    register_setting('wp_athletes_options_group', 'wp_athletes_options');
+    
+    add_settings_section(
+        'wp_athletes_section', 
+        'General Settings', 
+        'wp_athletes_section_callback', 
+        'wp_athletes_settings'
+    );
+
+    add_settings_field(
+        'wp_athletes_field_enable_search', 
+        'Enable Search Feature', 
+        'wp_athletes_field_enable_search_callback', 
+        'wp_athletes_settings', 
+        'wp_athletes_section'
+    );
+}
+
+/**
+ * Callback for the settings section description.
+ */
+function wp_athletes_section_callback() {
+    echo '<p>Adjust general settings for the Athletes Plugin.</p>';
+}
+
+/**
+ * Callback for the "enable search" setting field.
+ */
+function wp_athletes_field_enable_search_callback() {
+    $options = get_option('wp_athletes_options');
+    $checked = isset($options['enable_search']) ? 'checked' : '';
+    echo '<input type="checkbox" id="enable_search" name="wp_athletes_options[enable_search]" ' . $checked . '>';
+    echo '<label for="enable_search">Enable autocomplete search functionality on athlete archives.</label>';
+}
+
+add_action('admin_init', 'wp_athletes_register_settings');

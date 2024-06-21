@@ -1,0 +1,7 @@
+/* Front-end and editor styles for Athlete List Block */
+.athlete-list-block {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 15px;
+    margin: 20px 0;
+    background-color: #fff;
+}

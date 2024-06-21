@@ -1,10 +1,12 @@
 <?php
-// Prevent direct file access
+/**
+ * Register custom post types.
+ * Path: wp-athletes-plugin/includes/custom-post-types.php
+ * Description: Sets up the custom post type for athletes, providing detailed configurations for labels, supports, and capabilities.
+ */
+
 defined('ABSPATH') or die('Direct script access disallowed.');
 
-/**
- * Register the custom post type for athletes.
- */
 function register_athlete_cpt() {
     $labels = [
         'name'                  => _x('Athletes', 'Post Type General Name', 'wp-athletes'),
@@ -39,7 +41,7 @@ function register_athlete_cpt() {
         'label'               => __('Athlete', 'wp-athletes'),
         'description'         => __('Post Type Description', 'wp-athletes'),
         'labels'              => $labels,
-        'supports'            => ['title', 'editor', 'thumbnail'],
+        'supports'            => ['title', 'editor', 'thumbnail', 'excerpt', 'comments'],
         'taxonomies'          => ['team', 'discipline'],
         'hierarchical'        => false,
         'public'              => true,
@@ -53,31 +55,9 @@ function register_athlete_cpt() {
         'exclude_from_search' => false,
         'publicly_queryable'  => true,
         'capability_type'     => 'post',
-        'show_in_rest'        => true,
+        'show_in_rest'        => true, // Important for Gutenberg editor support
     ];
     register_post_type('athlete', $args);
 }
 
-/**
- * Register custom taxonomies for athletes.
- */
-function register_athlete_taxonomies() {
-    register_taxonomy('team', ['athlete'], [
-        'label'             => __('Teams', 'wp-athletes'),
-        'rewrite'           => ['slug' => 'team'],
-        'hierarchical'      => true,
-        'show_in_rest'      => true,
-        'public'            => true,
-    ]);
-
-    register_taxonomy('discipline', ['athlete'], [
-        'label'             => __('Disciplines', 'wp-athletes'),
-        'rewrite'           => ['slug' => 'discipline'],
-        'hierarchical'      => false,
-        'show_in_rest'      => true,
-        'public'            => true,
-    ]);
-}
-
 add_action('init', 'register_athlete_cpt');
-add_action('init', 'register_athlete_taxonomies');
